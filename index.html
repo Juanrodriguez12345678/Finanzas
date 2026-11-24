@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quiz Pacheco</title>
+<link rel="icon" href="/static/img/emblema.png">
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -16,8 +17,15 @@
   <nav>
     <button class="tab-btn active" data-tab="jugar">Jugar</button>
     <button class="tab-btn" data-tab="editar">Editar secciones</button>
-    <input type="range" id="volumen" min="0" max="1" step="0.05" title="Volumen">
-    <button id="btn-mute" title="Silenciar">🔊</button>
+    <div class="vol-menu">
+      <button id="btn-vol" title="Volumen">🔊</button>
+      <div id="vol-panel" class="hidden">
+        <label>General <input type="range" id="vol-general" min="0" max="1" step="0.05"><span id="vol-general-pct"></span></label>
+        <label>Música <input type="range" id="vol-musica" min="0" max="1" step="0.05"><span id="vol-musica-pct"></span></label>
+        <label>Efectos <input type="range" id="vol-efectos" min="0" max="1" step="0.05"><span id="vol-efectos-pct"></span></label>
+        <button id="btn-mute">Silenciar todo</button>
+      </div>
+    </div>
   </nav>
 </header>
 

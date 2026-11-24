@@ -16,49 +16,104 @@ function showError(msg) {
 // SONIDO: archivos originales del juego + efectos sintetizados
 // =====================================================================
 const Sonido = (() => {
+  // Tres niveles: general (todo), música de fondo y efectos (clics, risas, ruleta...).
+  const vol = { general: 0.8, musica: 0.35, efectos: 0.8 };
+  try {
+    const guardado = JSON.parse(localStorage.getItem("volumenes") || "{}");
+    for (const k of Object.keys(vol)) if (typeof guardado[k] === "number") vol[k] = guardado[k];
+  } catch (e) {}
+
   let ctx = null;
-  let master = null;
+  let master = null;   // general
+  let sfx = null;      // efectos sintetizados -> general
   let muted = false;
-  let volumen = 0.6;
   let latidoTimer = null;
   const cache = {};
-  try {
-    const v = parseFloat(localStorage.getItem("volumen"));
-    if (!isNaN(v)) volumen = v;
-  } catch (e) {}
+  const clipsActivos = new Set(); // archivos de efectos sonando (risas, aplausos...)
 
   function ac() {
     if (!ctx) {
       ctx = new (window.AudioContext || window.webkitAudioContext)();
       master = ctx.createGain();
-      master.gain.value = volumen;
-      master.connect(ctx.destination);
+      sfx = ctx.createGain();
+      sfx.connect(master).connect(ctx.destination);
+      aplicarGanancias();
     }
     if (ctx.state === "suspended") ctx.resume();
     return ctx;
   }
 
+  function aplicarGanancias() {
+    if (master) master.gain.value = muted ? 0 : vol.general;
+    if (sfx) sfx.gain.value = vol.efectos;
+    for (const c of clipsActivos) c.audio.volume = volClip(c.base);
+    Musica.actualizar();
+  }
+  const volClip = (base) => (muted ? 0 : Math.min(1, base * vol.general * vol.efectos));
+
+  // ---------------------------------------------------------------- música
+  // Suena siempre, salvo durante la pregunta (latido) o mientras suena un efecto grabado.
+  const Musica = (() => {
+    const audio = new Audio("/static/sounds/musica-fondo.mp3");
+    audio.loop = true;
+    audio.preload = "auto";
+    audio.volume = 0;
+    let iniciada = false;
+    let actual = 0;   // 0..1 nivel de "fade"
+    let timer = null;
+
+    const silenciada = () => muted || latidoTimer !== null || clipsActivos.size > 0;
+
+    function paso() {
+      const objetivo = silenciada() ? 0 : 1;
+      const v = objetivo > actual ? 0.04 : 0.08; // entra suave, sale rápido
+      actual = Math.abs(objetivo - actual) <= v ? objetivo : actual + Math.sign(objetivo - actual) * v;
+      audio.volume = Math.min(1, actual * vol.general * vol.musica);
+      if (actual === 0 && !audio.paused) audio.pause();
+      if (actual > 0 && audio.paused && iniciada) audio.play().catch(() => {});
+      if (actual === objetivo) { clearInterval(timer); timer = null; }
+    }
+    return {
+      // Los navegadores bloquean el audio hasta el primer clic del usuario.
+      iniciar() {
+        if (iniciada) return;
+        iniciada = true;
+        this.actualizar();
+      },
+      actualizar() {
+        if (!iniciada) return;
+        if (!silenciada() && audio.paused) audio.play().catch(() => {});
+        if (!timer) timer = setInterval(paso, 40);
+      },
+    };
+  })();
+
   // maxMs: corta el audio con un fade-out (para clips largos como los aplausos)
-  function archivo(nombre, vol = 1, maxMs = 0) {
+  function archivo(nombre, v = 1, maxMs = 0) {
     if (muted) return;
     const a = (cache[nombre] ||= new Audio("/static/sounds/" + nombre)).cloneNode();
-    const base = Math.min(1, vol * volumen);
-    a.volume = base;
-    a.play().catch(() => {});
+    const clip = { audio: a, base: v };
+    a.volume = volClip(v);
+    const terminar = () => { clipsActivos.delete(clip); Musica.actualizar(); };
+    a.addEventListener("ended", terminar);
+    a.addEventListener("pause", terminar);
+    clipsActivos.add(clip);
+    Musica.actualizar();
+    a.play().catch(terminar);
     if (maxMs) {
       setTimeout(() => {
         const pasos = 10;
         let i = 0;
         const t = setInterval(() => {
           i++;
-          a.volume = Math.max(0, base * (1 - i / pasos));
+          a.volume = Math.max(0, volClip(v) * (1 - i / pasos));
           if (i >= pasos) { clearInterval(t); a.pause(); }
         }, 40);
       }, maxMs);
     }
   }
 
-  function ruido(dur, vol, filtroHz, tipo = "lowpass") {
+  function ruido(dur, v, filtroHz, tipo = "lowpass") {
     if (muted) return;
     const c = ac();
     const buf = c.createBuffer(1, c.sampleRate * dur, c.sampleRate);
@@ -70,12 +125,12 @@ const Sonido = (() => {
     f.type = tipo;
     f.frequency.value = filtroHz;
     const g = c.createGain();
-    g.gain.value = vol;
-    src.connect(f).connect(g).connect(master);
+    g.gain.value = v;
+    src.connect(f).connect(g).connect(sfx);
     src.start();
   }
 
-  function tono(freq, dur, vol, tipo = "sine", freqFin) {
+  function tono(freq, dur, v, tipo = "sine", freqFin) {
     if (muted) return;
     const c = ac();
     const o = c.createOscillator();
@@ -83,16 +138,16 @@ const Sonido = (() => {
     o.type = tipo;
     o.frequency.setValueAtTime(freq, c.currentTime);
     if (freqFin) o.frequency.exponentialRampToValueAtTime(freqFin, c.currentTime + dur);
-    g.gain.setValueAtTime(vol, c.currentTime);
+    g.gain.setValueAtTime(v, c.currentTime);
     g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
-    o.connect(g).connect(master);
+    o.connect(g).connect(sfx);
     o.start();
     o.stop(c.currentTime + dur);
   }
 
   return {
     archivo,
-    // ticks suaves y graves (antes eran clics agudos muy fuertes)
+    iniciarMusica() { ac(); Musica.iniciar(); },
     tick() { tono(900, 0.025, 0.044, "triangle"); },
     hover() { tono(600, 0.02, 0.019, "triangle"); },
     sierra() {
@@ -112,7 +167,7 @@ const Sonido = (() => {
       g.gain.setValueAtTime(0.0001, c.currentTime);
       g.gain.exponentialRampToValueAtTime(0.22, c.currentTime + 0.05);
       g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.9);
-      o.connect(g).connect(master);
+      o.connect(g).connect(sfx);
       o.start(); lfo.start();
       o.stop(c.currentTime + 0.9); lfo.stop(c.currentTime + 0.9);
       ruido(0.8, 0.15, 2500, "bandpass");
@@ -125,31 +180,60 @@ const Sonido = (() => {
       ruido(1.2, 0.2, 600);
     },
     tecla() { tono(1200 + Math.random() * 300, 0.012, 0.015, "triangle"); },
-    setVolumen(v) {
-      volumen = v;
-      if (master) master.gain.value = v;
-      try { localStorage.setItem("volumen", String(v)); } catch (e) {}
+    setVolumen(canal, v) {
+      vol[canal] = v;
+      aplicarGanancias();
+      try { localStorage.setItem("volumenes", JSON.stringify(vol)); } catch (e) {}
     },
-    get volumen() { return volumen; },
+    volumen(canal) { return vol[canal]; },
     latido(on) {
       clearInterval(latidoTimer);
       latidoTimer = null;
-      if (!on) return;
-      const beat = () => { tono(55, 0.18, 0.7, "sine", 35); setTimeout(() => tono(50, 0.15, 0.5, "sine", 30), 220); };
-      beat();
-      latidoTimer = setInterval(beat, 1100);
+      if (on) {
+        const beat = () => { tono(55, 0.18, 0.7, "sine", 35); setTimeout(() => tono(50, 0.15, 0.5, "sine", 30), 220); };
+        beat();
+        latidoTimer = setInterval(beat, 1100);
+      }
+      Musica.actualizar();
     },
-    toggle() { muted = !muted; if (muted) this.latido(false); return muted; },
+    toggle() {
+      muted = !muted;
+      if (muted) this.latido(false);
+      aplicarGanancias();
+      return muted;
+    },
     get muted() { return muted; },
   };
 })();
 
-$("#volumen").value = Sonido.volumen;
-$("#volumen").addEventListener("input", (e) => Sonido.setVolumen(parseFloat(e.target.value)));
-
-$("#btn-mute").addEventListener("click", () => {
-  $("#btn-mute").textContent = Sonido.toggle() ? "🔇" : "🔊";
+// ---------------------------------------------------------- menú de volumen
+for (const canal of ["general", "musica", "efectos"]) {
+  const slider = $("#vol-" + canal);
+  const pct = $("#vol-" + canal + "-pct");
+  const pintar = () => (pct.textContent = Math.round(slider.value * 100) + "%");
+  slider.value = Sonido.volumen(canal);
+  pintar();
+  slider.addEventListener("input", () => {
+    Sonido.setVolumen(canal, parseFloat(slider.value));
+    pintar();
+  });
+}
+$("#btn-vol").addEventListener("click", (e) => {
+  e.stopPropagation();
+  $("#vol-panel").classList.toggle("hidden");
 });
+$("#vol-panel").addEventListener("click", (e) => e.stopPropagation());
+document.addEventListener("click", () => $("#vol-panel").classList.add("hidden"));
+$("#btn-mute").addEventListener("click", () => {
+  const m = Sonido.toggle();
+  $("#btn-mute").textContent = m ? "Activar sonido" : "Silenciar todo";
+  $("#btn-vol").textContent = m ? "🔇" : "🔊";
+});
+
+// La música arranca con la primera interacción (regla de autoplay de los navegadores).
+["pointerdown", "keydown"].forEach((ev) =>
+  document.addEventListener(ev, () => Sonido.iniciarMusica(), { once: true, capture: true })
+);
 
 // =====================================================================
 // FONDO: mercado en movimiento browniano (geometric Brownian motion)

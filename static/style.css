@@ -236,7 +236,20 @@ select, input {
 @keyframes cursor { 50% { opacity: 0; } }
 
 .saltar { margin-top: 18px; font-size: 14px; padding: 8px 14px; }
-#volumen { width: 110px; accent-color: var(--sangre-viva); padding: 0; }
+.vol-menu { position: relative; }
+#vol-panel {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 60;
+  width: 280px; padding: 14px 16px; display: grid; gap: 12px;
+  background: var(--panel); border: 1px solid var(--borde); border-radius: 4px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.8); backdrop-filter: blur(4px);
+}
+#vol-panel label {
+  display: grid; grid-template-columns: 64px 1fr 40px; align-items: center; gap: 8px;
+  font-family: "Special Elite", monospace; font-size: 14px; color: var(--hueso);
+}
+#vol-panel input[type=range] { width: 100%; accent-color: var(--sangre-viva); padding: 0; }
+#vol-panel span { font-family: "VT323", monospace; font-size: 18px; text-align: right; color: var(--muted); }
+#btn-mute { font-size: 13px; padding: 6px 10px; }
 
 .resultado-detalle { font-size: 20px; color: var(--hueso); }
 

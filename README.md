@@ -10,6 +10,10 @@ Juego de bonos en clase (IIND-3400), con tema SAW y finanzas. Es un sitio 100% e
 3. **Saltar pregunta** cambia la pregunta, mantiene el bono, y la pregunta saltada no vuelve a salir.
 4. **Finalizar y exportar Excel** descarga un `.xlsx` con dos hojas: Resumen y Detalle.
 
+## Sonido
+- **Música de fondo** (`static/sounds/musica-fondo.mp3`): arranca con el primer clic, porque los navegadores no permiten reproducir audio antes. Se silencia durante las preguntas, donde suena el latido, y mientras suenan las risas y los efectos grabados.
+- **Menú de volumen** (🔊 arriba a la derecha): tres sliders, General, Música y Efectos, más un botón para silenciar todo. Los niveles se guardan en cada navegador.
+
 ## Estructura
 | Ruta | Contenido |
 |---|---|

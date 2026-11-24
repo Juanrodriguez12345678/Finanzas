@@ -1,0 +1,407 @@
+[
+ {
+  "id": 1,
+  "texto": "2.      La Depreciación es un “Gasto NO EFECTIVO”; es decir una causación que NO genera un movimiento en el flujo de efectivo del período. Ésta es la razón por la cual la Depreciación junto con la Amortizaciones de la deuda, se suman al EBIT para obtener el EBITDA. Es decir EBIT + Depreciación y Amortizaciones = EBITDA.",
+  "respuesta": "F"
+ },
+ {
+  "id": 2,
+  "texto": "3.      Los impuestos operativos son los impuestos sin considerar el efecto de ahorro de impuestos de la Deuda, conocido como el “Tax Shield” o escudo tributario. Si consideramos un P&G tradicional, los impuestos operativos se muestran en el mismo antes de la Utilidad Neta Final a la cual se llega restando el valor de los impuestos de acuerdo a la tasa impositiva marginal.",
+  "respuesta": "F"
+ },
+ {
+  "id": 3,
+  "texto": "4.      En términos generales el Flujo Libre de Caja (FLC / FCF) corresponde el flujo que genera la operación del negocio y/o proyecto sin considerar ninguno de los efectos y/o flujos asociados a la Estructura de Capital. La expresión “libre” se utiliza para señalar el hecho de que es este flujo Libre de Caja el que se puede retirar del proyecto y/o firma para servir la deuda y remunerar al capital.",
+  "respuesta": "V"
+ },
+ {
+  "id": 4,
+  "texto": "5.      El flujo disponible de caja (FDC) o flujo de los Accionistas o Equity es, en una empresa sin apalancamiento Financiero, igual necesariamente al Flujo Libre de Caja. Cuando hablamos de una empresa 100% Capital (all equity firm) en este sentido todo el “Flujo Libre” o “Flujo Disponible” debería pagarse (entregarse) a los accionistas.",
+  "respuesta": "V"
+ },
+ {
+  "id": 5,
+  "texto": "6.      La valoración de activos de renta fija como bonos permite concluir que el precio de mercado un bono siempre es el valor presente del servicio de la deuda, por lo tanto si se compra el bono por dicho precio de mercado, el VPN del mismo será de cero, lo que significa que los bonos siempre se negocia a par.",
+  "respuesta": "F"
+ },
+ {
+  "id": 6,
+  "texto": "7.      La curva SPOT siempre tiene pendiente positiva como consecuencia de que los “US strips” de largo plazo son más riesgosos que los de corto plazo. Esto es perfectamente consistente con el hecho de que el “duration” de un strip de largo plazo es mayor al “duration” de un strip de corto plazo.",
+  "respuesta": "F"
+ },
+ {
+  "id": 7,
+  "texto": "8.      Si una firma NO tiene oportunidades de crecimiento y sus utilidades líquidas (dividendos en efectivo) son de $5 por año y sus tasa de capitalización o Costo de Oportunidad es del 10%, su acción deberá negociarse aproximadamente y “Ceteris Paribus”, en $50 de no ser así existirían oportunidades de arbitraje.",
+  "respuesta": "V"
+ },
+ {
+  "id": 8,
+  "texto": "9.      Si el valor de una acción en el mercado es de 66.67, sus utilidades actuales son de 5$ y su tasa de capitalización es del 10%, se puede concluir que la tasa de crecimiento esperada en el modelo de Gordon-Shapiro es del 4%.",
+  "respuesta": "F"
+ },
+ {
+  "id": 9,
+  "texto": "10.  Por definición en el modelo de Gordon-Shapiro, el valor estimado del precio de mercado de una acción se puede descomponer en: La perpetuidad de las utilidades líquidas a la tasa libre de riesgo (rf), más el valor presente de las oportunidades de crecimiento (PVGO).",
+  "respuesta": "F"
+ },
+ {
+  "id": 10,
+  "texto": "11.  Suponga que usted está interesado en emitir un instrumento financiero híbrido de deuda, por ejemplo un BONO CUPON-CONVERTIBLE-RECOMPRABLE. El valor de dicho bono en el mercado se determina descontando los flujos de caja que promete el bono a la tasa libre de riesgo (rf). Esta última es en realidad la curva Spot que representa los factores de descuento que establece el mercado que no son más que el VDT (TVM).",
+  "respuesta": "F"
+ },
+ {
+  "id": 11,
+  "texto": "12.  Si dos activos financieros tienen el mismo plazo, por ejemplo son bonos con cupón anual y plazo a cinco años que se negocian en el mismo mercado, y suponemos que la tasa libre de riesgo o curva spot se desplaza paralelamente, podemos afirmar que la tasa de descuento de los dos bonos es igual.",
+  "respuesta": "F"
+ },
+ {
+  "id": 12,
+  "texto": "13.  La definición de CAPITAL DE TRABAJO, cuando se está trabajando en la elaboración del flujo de caja LIBRE de un proyecto, incluye lo que genéricamente se denomina el cambio en el CAPITAL DE TRABAJO NETO. Este último es por definición todos los activos corrientes menos todos los pasivos corrientes (CTN=AC-PC). No obstante si la empresa tiene activos redundantes como excedentes de caja no necesarios para la operación del negocio, estos no son en sentido estricto parte del Capital de Trabajo y por lo tanto no deberían ser considerados como tal.",
+  "respuesta": "V"
+ },
+ {
+  "id": 13,
+  "texto": "14.  “Ceteris Paribus”, la inversión en Inventarios (crecimiento de inventarios entre períodos) es desde el punto de vista del Flujo de Caja LIBRE una disminución del mismo por lo tanto es financieramente correcto que los modelos de inventarios busquen la minimización de la inversión en el, sujeto a las restricciones propias de la operación y el ciclo de producción y ventas del negocio.",
+  "respuesta": "V"
+ },
+ {
+  "id": 14,
+  "texto": "15.  En mercados eficientes, los precios de los activos reflejan en principio toda información que resulte relevante para estimar los flujos futuros que generara dicho activo. En otras palabras, los precios reaccionan a información tanto macro como micro que puede afectar los flujos futuros del activo. Si esto es cierto los precios de dichos activos tenderán a moverse de manera aleatoria dado que la nueva información es aleatoria tanto en contenido como en tiempo.",
+  "respuesta": "V"
+ },
+ {
+  "id": 15,
+  "texto": "16.  La hipótesis Fuerte de la eficiencia del mercado es inconsistente con los resultados de los estudios de eventos que hablan de una “fuga de información” (leakeage), de la cual los inversionistas internos (inside investors) pueden tomar ventaja para obtener ganancias extraordinarias o anormales.",
+  "respuesta": "V"
+ },
+ {
+  "id": 16,
+  "texto": "17.  Un valor de mercado para la acción de $200 con una tasa de capitalización del 10% y utilidades del líquidas de 20 implica necesariamente un escenario con g=0.",
+  "respuesta": "V"
+ },
+ {
+  "id": 17,
+  "texto": "18.  En términos generales, si el precio de la acción de la compañía sube de 200 a 210 es porque la compañía anunció al mercado una noticia positiva, en el caso en particular del ejemplo de las notas de clase, se trata de un proyecto con VPN de cero que rinde por lo tanto igual al costo de oportunidad de los proveedores de capital.",
+  "respuesta": "F"
+ },
+ {
+  "id": 18,
+  "texto": "19.  Si el VPN de un proyecto es igual a cero se puede concluir que la rentabilidad del proyecto es cero y que por lo tanto no crea valor corporativo.",
+  "respuesta": "F"
+ },
+ {
+  "id": 19,
+  "texto": "20.  En un mundo donde el mercado financiero es eficiente y los precios de la acciones solamente reaccionan a nueva información, que es por definición impredecible, los cambios en los precios de las acciones se distribuyen siguiendo aproximadamente una distribución normal. Esta distribución está directamente vinculada al hecho de que los precios de las acciones siguen un comportamiento que se asemeja al de una “caminata aleatoria” simple conocida técnicamente corno “random walk”.",
+  "respuesta": "V"
+ },
+ {
+  "id": 20,
+  "texto": "21.  En términos generales se puede afirmar que todo modelo de “optimización” del capital de trabajo activo es un modelo de minimización; esto es particularmente cierto cuando estimamos la caja mínima necesaria toda vez que cualquier exceso de caja es un proyecto con VPN negativo, o en el mejor de los casos con VPN igual a cero.",
+  "respuesta": "V"
+ },
+ {
+  "id": 21,
+  "texto": "23.  Si el precio de un bono libre de riesgo no es igual al que se obtendría mediante el cálculo del valor presente de sus flujos descontados a la curva spot, existirían necesariamente oportunidades de arbitraje.",
+  "respuesta": "V"
+ },
+ {
+  "id": 22,
+  "texto": "24.  Mientras que la tasa spot se puede asimilar al Costo Promedio total, la tasa forward se puede asimilar al Costo Marginal. Si esto es cierto y la tasa forward es superior a la tasa spot podemos afirmar que la pendiente de la tasa spot es positiva en dicho punto.",
+  "respuesta": "V"
+ },
+ {
+  "id": 23,
+  "texto": "25.  La información de la tasa Spot de obtiene mediante la determinación de los factores de descuento que se obtienen de la información de los Treasury-coupon bonds del US Government.",
+  "respuesta": "F"
+ },
+ {
+  "id": 24,
+  "texto": "26.  Es posible entender una firma apalancada financieramente como un portafolio de dos activos, por un lado el Valor de los Activos sin considerar el Apalancamiento Financiero (All Equity Firm) y de otro lado el Valor del escudo tributario (Tax Shield). Por definición el peso de estos dos activos del portafolio total deberá ser igual a la relación D/E.",
+  "respuesta": "F"
+ },
+ {
+  "id": 25,
+  "texto": "28.  La introducción en el análisis de la Estructura de Capital de los Impuestos Corporativos y del tratamiento diferencial para efectos tributarios de los Gastos Financieros versus los Dividendos, muestra que “Ceteris Paribus”, efectivamente el flujo de caja de los accionistas y el flujo de caja operativo después de impuestos reales se ve afectado por el ahorro tributario de la Deuda, mejor conocido como Escudo Tributario. En este sentido el uso de la Deuda puede incrementar vía impuestos el valor de una firma.",
+  "respuesta": "V"
+ },
+ {
+  "id": 26,
+  "texto": "29.  Por definición, el Ahorro tributario por período es igual a los gastos financieros del período por la tasa impositiva del período. Cuando se utiliza una aproximación a perpetuidad, el valor presente del ahorro tributario se aproxima al valor de la Deuda por la tasa Impositiva.",
+  "respuesta": "V"
+ },
+ {
+  "id": 27,
+  "texto": "30.  El beta de la deuda se considera a niveles bajos de endeudamiento igual a cero dado que el riesgo de quiebra de la entidad cuando el nivel de endeudamiento es bajo es prácticamente inexistente.",
+  "respuesta": "F"
+ },
+ {
+  "id": 28,
+  "texto": "31.  Es posible considerar la firma como un portafolio de activos financieros Deuda y Equity. En este sentido se puede afirmar que el beta desapalancado de los Activos deberá ser el promedio ponderado del beta de la deuda y el beta del Equity.",
+  "respuesta": "F"
+ },
+ {
+  "id": 29,
+  "texto": "32.  En finanzas corporativas, cuando se considera el efecto impuestos de la Deuda, se puede afirmar que la función objetivo de la gerencia, es decir la maximización del valor de la firma, se puede reexpresar corno la minimización del costo de Capital Total (WACC). En este punto, es decir cuando el Costo de Capital, WACC está en su mínimo, el valor de la empresa está en su máximo, pues se encuentra el punto óptimo de trade-off entre el ahorro tributario de la Deuda y los costos de Quiebra o insolvencia (Finacial Distress).",
+  "respuesta": "V"
+ },
+ {
+  "id": 30,
+  "texto": "36.  Es claro que bajo un mundo con impuestos corporativos y a niveles bajos de apalancamiento financiero. el valor de mercado de la Deuda más el Valor de mercado del Equity deberán ser iguales al Valor de Mercado de los activos desapalancados financieramente más el valor presente del escudo tributario (tax Shield).",
+  "respuesta": "V"
+ },
+ {
+  "id": 31,
+  "texto": "37.  En la llamada visión tradicional del Costos de Capital (WACC) el mismo disminuye sistemáticamente con el incremento del endeudamiento; esto es así porque el costo de la deuda siempre es menor al costo de Equity al menos por dos razones: 1. el efecto de ahorro de impuestos de la deuda y 2. el hecho de que el Equity es más riesgoso que la Deuda y por ende los inversionistas requieren una tasa de capitalización mayor.",
+  "respuesta": "F"
+ },
+ {
+  "id": 32,
+  "texto": "38.  Se puede afirmar que la Estructura de Capital es solo relevante para efectos del Valor de una firma si esta tiene un efecto demostrable sobre: 1. Los Impuestos, 2. Los costos de transacción y 3. La política de inversión.",
+  "respuesta": "V"
+ },
+ {
+  "id": 33,
+  "texto": "39.  En sentido estricto, el ahorro tributario de la deuda o escudo tributario de la deuda se explica en la medida de que mientras los pagos por intereses y amortizaciones de capital son considerados un gasto del período y causados en el P&G, los pagos por dividendos no pueden contablemente ser considerados ni un costo ni un gasto del período y por lo tanto no tienen efecto en el nivel de los impuestos corporativos.",
+  "respuesta": "F"
+ },
+ {
+  "id": 34,
+  "texto": "40.  Si una empresa no generara utilidad contable y no paga renta presuntiva, el ahorro efectivo de impuestos vía la deuda es para efectos cero, pues en cualquier escenario la empresa no pagara ningún impuesto.",
+  "respuesta": "V"
+ },
+ {
+  "id": 35,
+  "texto": "41.  Dado que el beta del Equity es 1.2248 podemos afirmar sin ningún calculo que los betas de la Deuda, el Tax Shield, los activos apalancados y los activos desapalancados serán necesariamente menores a 1.2248.",
+  "respuesta": "V"
+ },
+ {
+  "id": 36,
+  "texto": "42.  Si el beta del Equity fue calculado con base en una regresión de los cambios en el precio de la acción de una empresa X respecto de los cambios en los precios del índice del mercado, podemos afirmar que la estructura óptima de capital de dicha empresa X está dada por la relación D/E en libros.",
+  "respuesta": "F"
+ },
+ {
+  "id": 37,
+  "texto": "46.  El beta de la deuda es cero por lo tanto el beta de el \"Tax Shield\" deberá ser necesariamente cero; esto es así porque la covarianza de los flujos de financiación con el mercado es cero; por lo tanto la covarianza del ahorro tributario será igualmente cero dado que el ahorro tributario es una transformación lineal del componente de gastos financieros de los flujos de financiación.",
+  "respuesta": "V"
+ },
+ {
+  "id": 38,
+  "texto": "47.  Dada la estructura de capital implícita en el beta del Equity, podemos concluir que el beta de los activos desapalancados es independiente de la tasa impositiva.",
+  "respuesta": "F"
+ },
+ {
+  "id": 39,
+  "texto": "48.  El costo de capital del Equity a considerar en el cálculo del WACC después de impuestos es igual se calcula directamente de la fórmula del CAPM sin considerar ningún ahorro tributario.",
+  "respuesta": "F"
+ },
+ {
+  "id": 40,
+  "texto": "49.  El costo de Capital TOTAL estimado bajo la metodología del WACC después de impuestos es exactamente el mismo que se obtiene cuando la estimación se hace vía el modelo de equilibrio parcial CAPM y en este se considera el efecto del ahorro de impuestos.",
+  "respuesta": "V"
+ },
+ {
+  "id": 41,
+  "texto": "51.  Un inversionista racional, aún en el caso de activos libres de riesgo, puede tener una rentabilidad esperada inferior a la tasa libre de riesgo.",
+  "respuesta": "F"
+ },
+ {
+  "id": 42,
+  "texto": "52.  En un marco de un modelo de empresa privada libre que opera en un mercado de capitales abierto, el objetivo de toda firma es maximizar el valor actual de sus ingresos.",
+  "respuesta": "F"
+ },
+ {
+  "id": 43,
+  "texto": "53.  Es imposible determinar el precio real de una acción dado que los flujos futuros son impredecibles por lo menos en el corto plazo.",
+  "respuesta": "F"
+ },
+ {
+  "id": 44,
+  "texto": "54.  Según el modelo de caminata aleatoria, el precio de una acción se comporta de manera irracional.",
+  "respuesta": "F"
+ },
+ {
+  "id": 45,
+  "texto": "55.  Las principales conclusiones del modelo de Random Walk son: 1. El precio de las acciones sigue una caminata aleatoria, por lo tanto su comportamiento es impredecible. 2. Los precios del mercado responden únicamente a NUEVA información. 3. El precio actual refleja toda la información disponible y las expectativas sobre la compañía.",
+  "respuesta": "V"
+ },
+ {
+  "id": 46,
+  "texto": "56.  La única forma de saber cómo nueva información afecta el precio de las acciones y conocer sobre la eficiencia del mercado (MEH) es mediante un estudio de eventos.",
+  "respuesta": "V"
+ },
+ {
+  "id": 47,
+  "texto": "57.  Las acciones de empresas serias y prósperas pueden considerarse como activos financieros libres de riesgo.",
+  "respuesta": "F"
+ },
+ {
+  "id": 48,
+  "texto": "58.  La teoría residual de dividendos supone que el inversionista es indiferente al decidir entre la obtención de su rendimiento vía el pago de un mayor dividendo en el momento actual y la obtención de un rendimiento equivalente vía la valorización de su acción.",
+  "respuesta": "V"
+ },
+ {
+  "id": 49,
+  "texto": "59.  La utilización de un método de depreciación acelerada disminuye las utilidades del ejercicio; su efecto sobre la liquidez del negocio es despreciable.",
+  "respuesta": "F"
+ },
+ {
+  "id": 50,
+  "texto": "60.  Al momento de conformar un portafolio con dos activos siempre es preferible que la correlación entre ambos sea mayor a cero.",
+  "respuesta": "F"
+ },
+ {
+  "id": 51,
+  "texto": "62.  Para un portafolio de 10 activos, la desviación estándar es una función cuadrática de los pesos relativos de cada activo, de sus varianzas y de las covarianzas cruzadas entre los respectivos activos. Se puede entonces afirmar que la expresión matemática “tendría” 100 elementos de los cuales 10 son varianzas y 90 covarianzas. Es por lo tanto el factor covarianza entre los activos el determinante primario de un portafolio.",
+  "respuesta": "V"
+ },
+ {
+  "id": 52,
+  "texto": "63.  De acuerdo a la teoría de la CML. La frontera eficiente, en un mundo donde existe un activo libre de riesgo  (riskfree rate) y se puede prestar y tomar prestado a la tasa libre de riesgo es por definición una línea cuyo intercepto es la misma tasa libre de riesgo y cuya pendiente es la llamada “prima por riesgo” dividida por el riesgo del mercado.",
+  "respuesta": "V"
+ },
+ {
+  "id": 53,
+  "texto": "64.  Cuando dos activos están perfecta y positivamente correlacionados, es decir su coeficiente de correlación es igual a uno, tanto el retorno esperado como el riesgo del portafolio son siempre una combinación lineal de los retornos esperados y el riesgo de los respectivos activos. En otras palabras, el Retorno y Riesgo del portafolio son respectivamente promedios ponderados de los retornos y riesgos individuales de los activos.",
+  "respuesta": "V"
+ },
+ {
+  "id": 54,
+  "texto": "Un amigo quiere predecir el precio de la acción A, para ello realizó una predicción a partir de información historica y obtuvo un intervalo de confianza de 95%, el cual le dice que el precio de la acción a para mañana se encontrara entre 96 y 99 con una media de 97,5. Su amigo afirma que esta media es la mejor estimación del precio futuro, ya que incorpora los precios historicos y los movimientos a la alza y a la baja. ¿Su amigo esta en lo correcto?",
+  "respuesta": "F"
+ },
+ {
+  "id": 55,
+  "texto": "Es posible afirmar que un punto basico es igual a 0,01%, por ende, 830b.p son equivalentes a una tasa de 8,3%",
+  "respuesta": "V"
+ },
+ {
+  "id": 56,
+  "texto": "Según lo visto en el modulo de valoración de acciones, es posible afirmar que si las compañias no tienen oportunidad de inversión en proyectos reales con VPN positivo, todas sus utilidades deberian pagarse en dividendos.",
+  "respuesta": "V"
+ },
+ {
+  "id": 57,
+  "texto": "Cuando el coeficiente de correlación entre los activos es menor a 1, el riesgo del portafolio es una función cuadratica (concava) de los riesgos de los diferentes activos que conforman el portafolio",
+  "respuesta": "V"
+ },
+ {
+  "id": 58,
+  "texto": "El riesgo diversificable es tambien conocido como riesgo sistemático o riesgo de mercado, y es aquel que esta directaemnte relacionado con factores macro que afectan a todas las empresas.",
+  "respuesta": "F"
+ },
+ {
+  "id": 59,
+  "texto": "El portafolio S&P 500 es el único portafolio que puede ser considerado una buena aproximación (“proxy”) de lo que se conoce como el portafolio de mercado",
+  "respuesta": "F"
+ },
+ {
+  "id": 60,
+  "texto": "Cuando hablamos de una estrategia pasiva como indexar los recursos en el portafolio de mercado, como podría ser el S&P 500, y afirmamos que es esta estrategia donde se maximiza el retorno y minimiza el riesgo en términos relativos estamos afirmando que siempre se obtendrán retornos positivos y que con esta estrategia se garantiza un rendimiento positivo y que no se perderá el capital invertido.",
+  "respuesta": "F"
+ },
+ {
+  "id": 61,
+  "texto": "Cuando se habla del efecto diversificación que se logra cuando se conforman portafolios con muchos activos, nos referimos a la estrategia de inversión que permite disminuir el riesgo de una inversión en el mercado de capitales tomando ventaja del hecho de que los activos individuales no están perfecta y positivamente correlacionados , por lo tanto , al aumentar el número de activos que conforman un portafolio, parte del riesgo de cada activo se diversifica y solamente queda el riesgo de mercado o riesgo no diversificable del activo. En este sentido el riesgo total de un activo se descompone en riesgo diversificable y riesgo no diversificable o sistemático.",
+  "respuesta": "V"
+ },
+ {
+  "id": 62,
+  "texto": "En términos generales los administradores de portafolios que asesoran a los inversionistas en la forma correcta de invertir en el mercado de capitales han demostrado que es posible mediante los análisis técnicos y fundamentales predecir el comportamiento futuro de los precios de las acciones y demás activos financieros que se transan en el mercado.",
+  "respuesta": "F"
+ },
+ {
+  "id": 63,
+  "texto": "43.  En un mundo bajo los supuestos de MM #1, la estructura de capital resulta irrelevante para calcular el Costos de Oportunidad; no obstante, y bajo \"Ceteris Paribus\", si la relación D/E aumenta podríamos obtener un Costos de Oportunidad diferente.",
+  "respuesta": "F"
+ },
+ {
+  "id": 64,
+  "texto": "44.  El peso de la Deuda cuando se calcula el WACC óptimo en un mundo bajo los supuestos de MM#1 es del 50%.",
+  "respuesta": "F"
+ },
+ {
+  "id": 65,
+  "texto": "45.  El costo del Equity a incluir en la fórmula del WACC cuando se trabaja en un mundo bajo los supuestos de MM I es igual al costo de oportunidad de los accionistas; para obtener este resultado se utiliza la formula general del CAPM y el Beta Apalancado de los Activos.",
+  "respuesta": "F"
+ },
+ {
+  "id": 66,
+  "texto": "33.  En un mundo bajo los supuestos de MM el WACC es constante independientemente de la estructura de capital es decir \"Ceteris Paribus\" el WACC de una empresa con alto nivel de apalancamiento financiero será igual al WACC de una empresa con bajo apalancamiento financiero.",
+  "respuesta": "V"
+ },
+ {
+  "id": 67,
+  "texto": "34.  La regla #5 dice sobre el valor de los activos apalancados de una empresa o valor de la firma que esta es igual al Valor de los activos de la firma desapalancados más el valor del Tax Shield menos el Valor de los costos de insolvencia quiebra (Financial Distress).",
+  "respuesta": "V"
+ },
+ {
+  "id": 68,
+  "texto": "35.  En un mundo donde los ahorros tributarios de la Deuda a nivel corporativo son compensados por los desahorros tributarios de la Deuda a nivel personal y la tasa de tributación marginal corporativa es igual a la tasa marginal de tributación personal, se puede afirmar que los efectos del escudo tributario sobre el valor se desaparecen.",
+  "respuesta": "V"
+ },
+ {
+  "id": 69,
+  "texto": "36.  Es claro que bajo un mundo con impuestos corporativos y a niveles bajos de apalancamiento financiero. el valor de mercado de la Deuda más el Valor de mercado del Equity deberán ser iguales al Valor de Mercado de los activos desapalancados financieramente más el valor presente del escudo tributario (tax Shield).",
+  "respuesta": "V"
+ },
+ {
+  "id": 70,
+  "texto": "27.  En un Mundo con impuestos corporativos, las conclusiones de MM no tienen validez toda vez que la Deuda puede incrementar el Flujo de caja de la operación del negocio o FLC.",
+  "respuesta": "F"
+ },
+ {
+  "id": 71,
+  "texto": "1.      La Estructura de Capital es parte de la Estructura Financiera, genéricamente es el resultado de lo que se denomina “the Investment Policy” y corresponde a las fuentes de financiación permanentes o de Largo Plazo (lado derecho del Balance General). En este sentido las cuentas por pagar (la financiación directa de los proveedores) no son parte de la Estructura de Capital. Esto es perfectamente consistente con la hipótesis de Modigliani Miller, según la cual las CxC no afectan el FLUJO LIBRE DE CAJA (FCL/FCF).",
+  "respuesta": "F"
+ },
+ {
+  "id": 72,
+  "texto": "Teniendo en cuenta la teoría respecto a la CML, la única decisión realmente importante para un inversionista es la mezcla y proporción entre los activos libres de riesgo y el portafolio de mercado, dado que este último es el único portafolio de activos financieros riesgos que debe considerarse en una estrategia óptima de inversión en los mercados financieros.",
+  "respuesta": "V"
+ },
+ {
+  "id": 73,
+  "texto": "Es correcto afirmar que existe una relación/estructura análoga y en cierta forma “paralela” entre la SML y la CML",
+  "respuesta": "V"
+ },
+ {
+  "id": 74,
+  "texto": "La utilidad del C.A.P.M es únicamente poder establecer cuál debería ser la rentabilidad esperada justa para una inversión en el mercado financiero dado su BETA",
+  "respuesta": "F"
+ },
+ {
+  "id": 75,
+  "texto": "Respecto al módulo de Estructura y Costo de Capital I, es correcto afirmar que el valor de mercado de los activos es igual al valor de mercado de la deuda más el valor de mercado de la deuda.",
+  "respuesta": "V"
+ },
+ {
+  "id": 76,
+  "texto": "El riesgo de los activos (Beta A) es el riesgo que enfrentan los bondholders. Es decir, es el riesgo de los flujos de caja Disponibles (FCD/ECF)",
+  "respuesta": "F"
+ },
+ {
+  "id": 77,
+  "texto": "Con Base en el Principio #1 de M&M, existe un principio de prioridad y subordinación de las obligaciones financieras (lado derecho); los shareholders están primero en la línea.",
+  "respuesta": "F"
+ },
+ {
+  "id": 78,
+  "texto": "El primer principio de M&M es: EL VALOR DE MERCADO DE LOS ACTIVOS ES IGUAL AL VALOR DE MERCADO DE LA DEUDA MÁS EL VALOR DE MERCADO DEL EQUITY. Esto se conoce como el balance general a precios de mercado (market value balance sheet)",
+  "respuesta": "V"
+ },
+ {
+  "id": 79,
+  "texto": "Suponga que el valor de mercado de una acción de una compañía es $10. Si la compañía tiene 1000 acciones en circulación y el valor de mercado de los bonos (AAA) de la compañía es $5.000 y ellos son su única deuda. Es posible afirmar que se cumple el Principio #1 de M&M?",
+  "respuesta": "V"
+ },
+ {
+  "id": 80,
+  "texto": "La Proposición # 1 de MM afirma que en un mercado perfecto (no impuestos + no costos de transacción + dada una política de inversión fija), el valor de los activos (firma), el riesgo de los activos (firma) y el costo de oportunidad (C.O. = WACC) de invertir en los activos (firma) dependen de la Estructura de Capital.",
+  "respuesta": "F"
+ },
+ {
+  "id": 81,
+  "texto": "El riesgo total de los activos debe ser igual al riesgo total de los securities. En otras palabras, el riesgo de la firma (activos) se distribuye entre los bondholders y los shareholders en función de su participación en la “propiedad” de la compañía, como se establece en el Principio #1 de MM.",
+  "respuesta": "F"
+ }
+]

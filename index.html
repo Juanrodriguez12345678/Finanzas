@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz Pacheco</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div id="bg"></div>
+<canvas id="market"></canvas>
+<div id="flicker"></div>
+
+<header>
+  <div class="logo">QUIZ <span>PACHECO</span></div>
+  <nav>
+    <button class="tab-btn active" data-tab="jugar">Jugar</button>
+    <button class="tab-btn" data-tab="editar">Editar secciones</button>
+    <input type="range" id="volumen" min="0" max="1" step="0.05" title="Volumen">
+    <button id="btn-mute" title="Silenciar">🔊</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ======================= TAB: JUGAR ======================= -->
+  <section id="tab-jugar" class="tab">
+
+    <div id="panel-inicio" class="inicio">
+      <img src="/static/img/emblema.png" class="emblema" alt="">
+      <h1 class="titulo">QUIZ PACHECO</h1>
+      <p class="subtitulo">IIND-3400 · Bulls, bears y estructura de capital</p>
+      <p class="frase">"Tu nota está en juego. ¿Vivir o quebrar? Tú decides."</p>
+      <div class="inicio-form">
+        <select id="select-seccion">
+          <option value="Sec1">Sección 1</option>
+          <option value="Sec2">Sección 2</option>
+        </select>
+        <span id="conteo-seccion" class="hint"></span>
+      </div>
+      <button id="btn-iniciar" class="btn-sangre grande">QUE EMPIECE EL JUEGO</button>
+    </div>
+
+    <div id="panel-juego" class="hidden">
+      <div class="toolbar">
+        <span id="info-seccion"></span>
+        <span id="info-restantes"></span>
+        <span class="spacer"></span>
+        <button id="btn-reset" class="btn-hueso">Reiniciar</button>
+        <button id="btn-finalizar" class="btn-sangre">Finalizar y exportar Excel</button>
+      </div>
+
+      <div class="escenario">
+        <img src="/static/img/titere.png" id="titere" alt="">
+
+        <div class="centro">
+          <div id="paso-spin" class="paso hidden">
+            <p class="frase">Alguien va a jugar...</p>
+            <button id="btn-spin" class="btn-sierra">
+              <span class="sierra-icono">⚙</span> GIRAR LA RULETA
+            </button>
+          </div>
+
+          <div id="paso-presente" class="paso hidden">
+            <p class="frase">La ruleta ha elegido a</p>
+            <h2 id="nombre-elegido" class="nombre-grande glitch"></h2>
+            <p class="codigo">Código <span id="codigo-elegido"></span></p>
+            <p class="frase">¿Está en el salón?</p>
+            <div class="botones">
+              <button id="btn-presente-si" class="btn-hueso grande">PRESENTE</button>
+              <button id="btn-presente-no" class="btn-acero grande">AUSENTE (−0.5)</button>
+            </div>
+          </div>
+
+          <div id="paso-caja" class="paso hidden">
+            <h2 id="nombre-caja" class="nombre-medio"></h2>
+            <p class="frase">Escoge tu trampa. Más bono, más riesgo.</p>
+            <div id="grid-cajas" class="grid-cajas"></div>
+          </div>
+
+          <div id="paso-pregunta" class="paso hidden">
+            <h2 id="nombre-pregunta" class="nombre-medio"></h2>
+            <p class="frase">En juego: <strong id="valor-caja-actual"></strong> puntos</p>
+            <div class="cinta">
+              <div id="texto-pregunta" class="pregunta-texto"></div>
+            </div>
+            <div class="botones">
+              <button id="btn-resp-v" class="btn-hueso grande">VERDADERO</button>
+              <button id="btn-resp-f" class="btn-hueso grande">FALSO</button>
+            </div>
+            <button id="btn-saltar" class="btn-acero saltar">↻ Saltar pregunta (mantiene el bono)</button>
+          </div>
+
+          <div id="paso-resultado" class="paso hidden">
+            <h2 id="resultado-titulo" class="nombre-medio"></h2>
+            <p id="resultado-detalle" class="resultado-detalle"></p>
+            <button id="btn-siguiente" class="btn-sierra">SIGUIENTE VÍCTIMA</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tablero">
+        <div id="grid-cajas-estado" class="grid-mini"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= TAB: EDITAR ======================= -->
+  <section id="tab-editar" class="tab hidden">
+    <div class="card">
+      <h2>Agregar estudiante</h2>
+      <div class="form-row">
+        <input id="nuevo-nombre" placeholder="Nombre">
+        <input id="nuevo-apellido" placeholder="Apellido">
+        <input id="nuevo-codigo" placeholder="Código">
+        <select id="nuevo-seccion">
+          <option value="Sec1">Sección 1</option>
+          <option value="Sec2">Sección 2</option>
+        </select>
+        <button id="btn-agregar-estudiante" class="btn-sangre">Agregar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Sección 1</h2>
+      <table class="tabla-estudiantes" id="tabla-sec1">
+        <thead><tr><th>Nombre</th><th>Apellido</th><th>Código</th><th>Activo</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Sección 2</h2>
+      <table class="tabla-estudiantes" id="tabla-sec2">
+        <thead><tr><th>Nombre</th><th>Apellido</th><th>Código</th><th>Activo</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<div id="ruleta-overlay" class="hidden">
+  <div class="ruleta-wrap">
+    <div class="puntero"></div>
+    <canvas id="ruleta" width="760" height="760"></canvas>
+  </div>
+</div>
+
+<div id="banner" class="hidden">
+  <div id="banner-texto"></div>
+  <div id="banner-puntos"></div>
+</div>
+
+<canvas id="fx"></canvas>
+
+<div class="ticker"><div class="ticker-track" id="ticker"></div></div>
+
+<p id="mensaje-error" class="error hidden"></p>
+
+<script src="/static/vendor/xlsx.full.min.js"></script>
+<script src="/static/motor.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

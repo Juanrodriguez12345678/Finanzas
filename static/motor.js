@@ -3,12 +3,28 @@
 // y se guarda en localStorage, así el sitio puede publicarse como estático (Vercel).
 const Motor = (() => {
   const CAJAS_INICIALES = [0.2, 0.2, 0.2, 0.2, 0.3, 0.3, 0.3, 0.3, 0.4, 0.4, 0.4, 0.4, 0.5, 0.5, 0.5, 0.5];
+  const VALORES_CAJA = [...new Set(CAJAS_INICIALES)];
   const KEY_DB = "quizpacheco.db.v1";
-  const KEY_STATE = "quizpacheco.state.v1";
+  const KEY_STATE = "quizpacheco.state.v2"; // v2: banco nuevo de preguntas (ids distintos)
+  const KEY_PREGUNTAS = "quizpacheco.preguntas.v2";
+  const KEY_AJUSTES = "quizpacheco.ajustes.v1";
+
+  // Probabilidad (%) de sacar una pregunta de dificultad 1, 2 y 3 según el valor de la casilla.
+  // Casillas bajas -> preguntas fáciles; casillas altas -> difíciles. Mínimo 10% por nivel.
+  const DIST_MIN = 10;
+  const DISTRIBUCION_DEFECTO = {
+    "0.2": [70, 20, 10],
+    "0.3": [45, 40, 15],
+    "0.4": [20, 45, 35],
+    "0.5": [10, 30, 60],
+  };
 
   class ErrorUsuario extends Error {}
 
   let PREGUNTAS = [];
+  let BANCO_BASE = { version: "", preguntas: [] };
+  let bancoModificado = false;
+  let ajustes = null;
   let db = null;
   const state = {};
 
@@ -20,6 +36,14 @@ const Motor = (() => {
   }
   const guardarDatos = () => escribir(KEY_DB, db);
   const guardarEstado = () => escribir(KEY_STATE, state);
+  const copia = (x) => JSON.parse(JSON.stringify(x));
+
+  // El banco editado vive en este navegador; el original sigue en data/preguntas.json.
+  function guardarPreguntas() {
+    bancoModificado = true;
+    escribir(KEY_PREGUNTAS, { version_base: BANCO_BASE.version, preguntas: PREGUNTAS });
+  }
+  const guardarAjustes = () => escribir(KEY_AJUSTES, ajustes);
 
   function resetState() {
     for (const k of Object.keys(state)) delete state[k];
@@ -38,17 +62,29 @@ const Motor = (() => {
   }
 
   const listo = (async () => {
-    const [preguntas, semilla] = await Promise.all([
+    const [banco, semilla] = await Promise.all([
       fetch("/data/preguntas.json").then((r) => r.json()),
       fetch("/data/estudiantes.json").then((r) => r.json()),
     ]);
-    PREGUNTAS = preguntas;
+    BANCO_BASE = Array.isArray(banco) ? { version: "", preguntas: banco } : banco;
+    const local = leer(KEY_PREGUNTAS);
+    if (local && Array.isArray(local.preguntas)) {
+      PREGUNTAS = local.preguntas;
+      bancoModificado = true;
+    } else {
+      PREGUNTAS = copia(BANCO_BASE.preguntas);
+    }
+
+    ajustes = leer(KEY_AJUSTES);
+    if (!ajustes || !validarDistribucion(ajustes.distribucion, false)) ajustes = { distribucion: copia(DISTRIBUCION_DEFECTO) };
+
     db = leer(KEY_DB);
     if (!db || !Array.isArray(db.estudiantes)) {
       db = { seq: { est: 0, partida: 0, res: 0 }, estudiantes: [], partidas: [], resultados: [] };
       for (const e of semilla) db.estudiantes.push({ id: ++db.seq.est, ...e, activo: 1 });
-      guardarDatos();
     }
+    db.usos ||= {}; // veces que salió cada pregunta (usada_en_partida), por id
+    guardarDatos();
     resetState();
     const previo = leer(KEY_STATE);
     if (previo && previo.fase) Object.assign(state, previo);
@@ -56,6 +92,8 @@ const Motor = (() => {
 
   const estudiantePorId = (id) => db.estudiantes.find((e) => e.id === id);
   const azar = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const preguntaPorId = (id) => PREGUNTAS.find((p) => p.id === id);
+  const claveCaja = (valor) => Number(valor).toFixed(1);
 
   function publicState() {
     return {
@@ -71,28 +109,55 @@ const Motor = (() => {
       estudiante_actual: state.estudiante_actual,
       caja_actual: state.caja_actual,
       pregunta_actual: state.pregunta_actual
-        ? { id: state.pregunta_actual.id, texto: state.pregunta_actual.texto }
+        ? {
+            id: state.pregunta_actual.id,
+            texto: state.pregunta_actual.texto,
+            dificultad: state.pregunta_actual.dificultad,
+            tema: state.pregunta_actual.tema,
+          }
         : null,
       ultimo_resultado: state.ultimo_resultado,
     };
   }
 
-  function guardarResultado({ pregunta_id, presente, caja_valor, correcto, puntaje }) {
-    db.resultados.push({
+  function guardarResultado({ pregunta, presente, caja_valor, correcto, puntaje }) {
+    const r = {
       id: ++db.seq.res,
       partida_id: state.partida_id,
       estudiante_id: state.estudiante_actual.id,
-      pregunta_id,
+      pregunta_id: pregunta ? pregunta.id : null,
+      // copia del texto: la pregunta puede editarse o borrarse después
+      pregunta_texto: pregunta ? pregunta.texto : null,
+      dificultad: pregunta ? pregunta.dificultad : null,
+      tema: pregunta ? pregunta.tema : null,
       presente: presente ? 1 : 0,
       caja_valor,
       correcto: correcto == null ? null : correcto ? 1 : 0,
+      justifico: correcto ? 1 : null,
       puntaje,
       fecha: new Date().toISOString(),
-    });
+    };
+    db.resultados.push(r);
+    if (pregunta) db.usos[pregunta.id] = (db.usos[pregunta.id] || 0) + 1;
     guardarDatos();
+    return r;
   }
 
-  function sacarPregunta() {
+  // Sortea un nivel de dificultad (1, 2 o 3) con los pesos de la casilla, solo entre
+  // los niveles que todavía tienen preguntas; si un nivel se agotó, se reparte su peso.
+  function sortearDificultad(valorCaja, nivelesDisponibles) {
+    const pesos = ajustes.distribucion[claveCaja(valorCaja)] || [34, 33, 33];
+    const opciones = [1, 2, 3].filter((d) => nivelesDisponibles.has(d));
+    const total = opciones.reduce((s, d) => s + pesos[d - 1], 0);
+    let x = Math.random() * total;
+    for (const d of opciones) {
+      x -= pesos[d - 1];
+      if (x < 0) return d;
+    }
+    return opciones[opciones.length - 1];
+  }
+
+  function sacarPregunta(valorCaja) {
     const excluir = new Set(
       db.resultados
         .filter((r) => r.partida_id === state.partida_id && r.pregunta_id != null)
@@ -101,7 +166,12 @@ const Motor = (() => {
     );
     const disponibles = PREGUNTAS.filter((p) => !excluir.has(p.id));
     if (!disponibles.length) throw new ErrorUsuario("No quedan preguntas disponibles en el banco de preguntas.");
-    return azar(disponibles);
+    const dificultad = sortearDificultad(valorCaja, new Set(disponibles.map((p) => p.dificultad)));
+    const delNivel = disponibles.filter((p) => p.dificultad === dificultad);
+    // Dentro del nivel, prioriza las que menos han salido en partidas anteriores.
+    const usos = (p) => db.usos[p.id] || 0;
+    const minimo = Math.min(...delNivel.map(usos));
+    return copia(azar(delNivel.filter((p) => usos(p) === minimo)));
   }
 
   // ------------------------------------------------------------------ juego
@@ -146,7 +216,7 @@ const Motor = (() => {
       if (!disponibles.length) throw new ErrorUsuario("No quedan casillas disponibles.");
       const caja = azar(disponibles);
       caja.usada = true;
-      guardarResultado({ pregunta_id: null, presente: false, caja_valor: caja.valor, correcto: false, puntaje: -0.5 });
+      guardarResultado({ pregunta: null, presente: false, caja_valor: caja.valor, correcto: false, puntaje: -0.5 });
       state.ultimo_resultado = {
         estudiante: state.estudiante_actual,
         presente: false,
@@ -169,7 +239,7 @@ const Motor = (() => {
     if (state.fase !== "esperando_caja") throw new ErrorUsuario("No se esperaba elegir casilla en esta fase.");
     const caja = state.cajas.find((c) => c.id === caja_id);
     if (!caja || caja.usada) throw new ErrorUsuario("Casilla inválida o ya usada.");
-    const p = sacarPregunta();
+    const p = sacarPregunta(caja.valor);
     caja.usada = true;
     state.caja_actual = caja;
     state.pregunta_actual = p;
@@ -181,7 +251,7 @@ const Motor = (() => {
     if (state.fase !== "esperando_respuesta")
       throw new ErrorUsuario("Solo se puede saltar una pregunta mientras se está respondiendo.");
     state.preguntas_saltadas.push(state.pregunta_actual.id);
-    state.pregunta_actual = sacarPregunta();
+    state.pregunta_actual = sacarPregunta(state.caja_actual.valor);
     return publicState();
   }
 
@@ -192,19 +262,43 @@ const Motor = (() => {
     const caja = state.caja_actual;
     const correcto = respuesta === p.respuesta;
     const puntaje = correcto ? caja.valor : -caja.valor;
-    guardarResultado({ pregunta_id: p.id, presente: true, caja_valor: caja.valor, correcto, puntaje });
+    const r = guardarResultado({ pregunta: p, presente: true, caja_valor: caja.valor, correcto, puntaje });
     state.ultimo_resultado = {
+      resultado_id: r.id,
       estudiante: state.estudiante_actual,
       presente: true,
       caja_valor: caja.valor,
-      pregunta: { texto: p.texto, respuesta_correcta: p.respuesta },
+      pregunta: {
+        texto: p.texto,
+        respuesta_correcta: p.respuesta,
+        justificacion: p.justificacion || "",
+        dificultad: p.dificultad,
+        tema: p.tema,
+      },
       correcto,
+      justifico: correcto ? true : null,
       puntaje,
       mensaje: correcto ? "¡Correcto!" : "Incorrecto.",
     };
     state.caja_actual = null;
     state.pregunta_actual = null;
     state.fase = "ronda_completa";
+    return publicState();
+  }
+
+  // Acertó pero no supo justificar: el bono queda en 0.0. Se puede deshacer.
+  function apiJustificacion({ justifico }) {
+    const u = state.ultimo_resultado;
+    if (state.fase !== "ronda_completa" || !u || !u.presente || !u.correcto)
+      throw new ErrorUsuario("Solo aplica a una respuesta correcta recién dada.");
+    const r = db.resultados.find((x) => x.id === u.resultado_id);
+    u.justifico = !!justifico;
+    u.puntaje = justifico ? u.caja_valor : 0;
+    if (r) {
+      r.justifico = justifico ? 1 : 0;
+      r.puntaje = u.puntaje;
+      guardarDatos();
+    }
     return publicState();
   }
 
@@ -247,19 +341,26 @@ const Motor = (() => {
         .sort((a, b) => b.total - a.total)
         .map((f) => [f.e.nombre, f.e.apellido, f.e.codigo, f.total, f.rondas])
     );
-    const hojaDetalle = [["Nombre", "Apellido", "Código", "Presente", "Valor Casilla", "Correcto", "Puntaje", "Pregunta"]].concat(
+    const siNo = (v) => (v == null ? "" : v ? "Sí" : "No");
+    const hojaDetalle = [[
+      "Nombre", "Apellido", "Código", "Presente", "Valor Casilla", "Correcto", "Justificó", "Puntaje",
+      "Dificultad", "Tema", "Pregunta",
+    ]].concat(
       res.map((r) => {
         const e = estudiantePorId(r.estudiante_id) || sinDatos;
-        const p = PREGUNTAS.find((q) => q.id === r.pregunta_id);
+        const p = preguntaPorId(r.pregunta_id);
         return [
           e.nombre,
           e.apellido,
           e.codigo,
           r.presente ? "Sí" : "No",
           r.caja_valor,
-          r.correcto == null ? "" : r.correcto ? "Sí" : "No",
+          siNo(r.correcto),
+          r.correcto ? siNo(r.justifico ?? 1) : "",
           r.puntaje,
-          p ? p.texto : "(ausente, sin pregunta)",
+          r.dificultad ?? (p ? p.dificultad : ""),
+          r.tema ?? (p ? p.tema : ""),
+          r.pregunta_texto || (p ? p.texto : r.presente ? "" : "(ausente, sin pregunta)"),
         ];
       })
     );
@@ -268,7 +369,10 @@ const Motor = (() => {
     const ws1 = XLSX.utils.aoa_to_sheet(hojaResumen);
     ws1["!cols"] = [{ wch: 20 }, { wch: 24 }, { wch: 12 }, { wch: 14 }, { wch: 15 }];
     const ws2 = XLSX.utils.aoa_to_sheet(hojaDetalle);
-    ws2["!cols"] = [{ wch: 20 }, { wch: 24 }, { wch: 12 }, { wch: 9 }, { wch: 13 }, { wch: 9 }, { wch: 9 }, { wch: 80 }];
+    ws2["!cols"] = [
+      { wch: 20 }, { wch: 24 }, { wch: 12 }, { wch: 9 }, { wch: 13 }, { wch: 9 }, { wch: 10 }, { wch: 9 },
+      { wch: 10 }, { wch: 26 }, { wch: 80 },
+    ];
     XLSX.utils.book_append_sheet(wb, ws1, "Resumen");
     XLSX.utils.book_append_sheet(wb, ws2, "Detalle");
 
@@ -318,6 +422,119 @@ const Motor = (() => {
     return { ok: true };
   }
 
+  // --------------------------------------------------------------- preguntas
+  function limpiarPregunta(body) {
+    const texto = (body.texto || "").trim();
+    const respuesta = body.respuesta;
+    const dificultad = parseInt(body.dificultad, 10);
+    if (!texto) throw new ErrorUsuario("La pregunta no puede estar vacía.");
+    if (!["V", "F"].includes(respuesta)) throw new ErrorUsuario("La respuesta debe ser V o F.");
+    if (![1, 2, 3].includes(dificultad)) throw new ErrorUsuario("La dificultad debe ser 1, 2 o 3.");
+    return {
+      texto,
+      respuesta,
+      dificultad,
+      justificacion: (body.justificacion || "").trim(),
+      tema: (body.tema || "").trim(),
+    };
+  }
+
+  function apiPreguntasList() {
+    return {
+      preguntas: PREGUNTAS.map((p) => ({ ...p, usada_en_partida: db.usos[p.id] || 0 })),
+      modificado: bancoModificado,
+      version_base: BANCO_BASE.version,
+      base_total: BANCO_BASE.preguntas.length,
+    };
+  }
+
+  function apiPreguntasAdd(body) {
+    const datos = limpiarPregunta(body);
+    const id = PREGUNTAS.reduce((m, p) => Math.max(m, p.id), 0) + 1;
+    const tema = datos.tema;
+    const numero_original = PREGUNTAS.filter((p) => p.tema === tema).reduce((m, p) => Math.max(m, p.numero_original || 0), 0) + 1;
+    PREGUNTAS.push({ id, numero_original, ...datos });
+    guardarPreguntas();
+    return { id };
+  }
+
+  function apiPreguntasUpdate(id, body) {
+    const p = preguntaPorId(id);
+    if (!p) throw new ErrorUsuario("Pregunta no encontrada.");
+    Object.assign(p, limpiarPregunta(body));
+    guardarPreguntas();
+    return { ok: true };
+  }
+
+  function apiPreguntasDelete(id) {
+    if (PREGUNTAS.length <= 1) throw new ErrorUsuario("El banco debe tener al menos una pregunta.");
+    PREGUNTAS = PREGUNTAS.filter((p) => p.id !== id);
+    delete db.usos[id];
+    guardarDatos();
+    guardarPreguntas();
+    return { ok: true };
+  }
+
+  function apiPreguntasRestaurar() {
+    localStorage.removeItem(KEY_PREGUNTAS);
+    PREGUNTAS = copia(BANCO_BASE.preguntas);
+    bancoModificado = false;
+    return { ok: true };
+  }
+
+  function apiPreguntasResetUsos() {
+    db.usos = {};
+    guardarDatos();
+    return { ok: true };
+  }
+
+  // ------------------------------------------------------------------ ajustes
+  function validarDistribucion(dist, lanzar = true) {
+    const falla = (msg) => {
+      if (lanzar) throw new ErrorUsuario(msg);
+      return false;
+    };
+    if (!dist || typeof dist !== "object") return falla("Distribución inválida.");
+    for (const v of VALORES_CAJA) {
+      const k = claveCaja(v);
+      const fila = dist[k];
+      if (!Array.isArray(fila) || fila.length !== 3 || fila.some((x) => !Number.isInteger(x)))
+        return falla(`Casilla ${k}: usa porcentajes enteros.`);
+      if (fila.some((x) => x < DIST_MIN))
+        return falla(`Casilla ${k}: cada dificultad necesita al menos ${DIST_MIN}%.`);
+      const suma = fila.reduce((a, b) => a + b, 0);
+      if (suma !== 100) return falla(`Casilla ${k}: los porcentajes suman ${suma}%, deben sumar 100%.`);
+    }
+    return true;
+  }
+
+  const apiAjustesGet = () => ({
+    distribucion: ajustes.distribucion,
+    defecto: DISTRIBUCION_DEFECTO,
+    minimo: DIST_MIN,
+    casillas: VALORES_CAJA.map(claveCaja),
+    // cuántas preguntas hay de cada nivel, para mostrarlo junto a los porcentajes
+    por_dificultad: [1, 2, 3].map((d) => PREGUNTAS.filter((p) => p.dificultad === d).length),
+  });
+
+  function apiAjustesSet(body) {
+    const dist = {};
+    for (const v of VALORES_CAJA) {
+      const k = claveCaja(v);
+      dist[k] = (body.distribucion?.[k] || []).map((x) => Number(x));
+    }
+    validarDistribucion(dist);
+    ajustes.distribucion = dist;
+    guardarAjustes();
+    return apiAjustesGet();
+  }
+
+  function apiAjustesRestaurar() {
+    ajustes.distribucion = copia(DISTRIBUCION_DEFECTO);
+    guardarAjustes();
+    return apiAjustesGet();
+  }
+
   // ------------------------------------------------------------------ router
   function rutear(method, ruta, body = {}) {
     const url = new URL(ruta, location.origin);
@@ -330,6 +547,17 @@ const Motor = (() => {
     if (p.startsWith("/api/estudiantes/") && method === "PUT") return apiEstudiantesUpdate(idDe(), body);
     if (p.startsWith("/api/estudiantes/") && method === "DELETE") return apiEstudiantesDelete(idDe());
 
+    if (p === "/api/preguntas" && method === "GET") return apiPreguntasList();
+    if (p === "/api/preguntas" && method === "POST") return apiPreguntasAdd(body);
+    if (p === "/api/preguntas/restaurar" && method === "POST") return apiPreguntasRestaurar();
+    if (p === "/api/preguntas/reset_usos" && method === "POST") return apiPreguntasResetUsos();
+    if (p.startsWith("/api/preguntas/") && method === "PUT") return apiPreguntasUpdate(idDe(), body);
+    if (p.startsWith("/api/preguntas/") && method === "DELETE") return apiPreguntasDelete(idDe());
+
+    if (p === "/api/ajustes" && method === "GET") return apiAjustesGet();
+    if (p === "/api/ajustes" && method === "PUT") return apiAjustesSet(body);
+    if (p === "/api/ajustes/restaurar" && method === "POST") return apiAjustesRestaurar();
+
     if (method === "GET" && p === "/api/game/state") return publicState();
     if (method === "POST") {
       switch (p) {
@@ -339,6 +567,7 @@ const Motor = (() => {
         case "/api/game/choose_box": return apiChooseBox(body);
         case "/api/game/skip": return apiSkip();
         case "/api/game/answer": return apiAnswer(body);
+        case "/api/game/justificacion": return apiJustificacion(body);
         case "/api/game/next": return apiNext();
         case "/api/game/reset": return apiReset();
         case "/api/game/finish": return apiFinish();
@@ -355,7 +584,10 @@ const Motor = (() => {
     return JSON.parse(JSON.stringify(resultado));
   }
 
-  return { llamar, listo };
+  // Para exportar el banco (Excel / JSON) desde la pestaña de preguntas.
+  const banco = () => copia({ version: BANCO_BASE.version, preguntas: PREGUNTAS });
+
+  return { llamar, listo, banco };
 })();
 
 // Misma firma que usaba la versión con servidor.

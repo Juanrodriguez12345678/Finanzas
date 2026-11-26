@@ -16,7 +16,9 @@
   <div class="logo">QUIZ <span>PACHECO</span></div>
   <nav>
     <button class="tab-btn active" data-tab="jugar">Jugar</button>
+    <button class="tab-btn" data-tab="preguntas">Preguntas</button>
     <button class="tab-btn" data-tab="editar">Editar secciones</button>
+    <button class="tab-btn" data-tab="ajustes">Ajustes</button>
     <div class="vol-menu">
       <button id="btn-vol" title="Volumen">🔊</button>
       <div id="vol-panel" class="hidden">
@@ -88,6 +90,7 @@
           <div id="paso-pregunta" class="paso hidden">
             <h2 id="nombre-pregunta" class="nombre-medio"></h2>
             <p class="frase">En juego: <strong id="valor-caja-actual"></strong> puntos</p>
+            <p class="meta-pregunta"><span id="tema-pregunta"></span><span id="dif-pregunta" class="calaveras"></span></p>
             <div class="cinta">
               <div id="texto-pregunta" class="pregunta-texto"></div>
             </div>
@@ -101,7 +104,13 @@
           <div id="paso-resultado" class="paso hidden">
             <h2 id="resultado-titulo" class="nombre-medio"></h2>
             <p id="resultado-detalle" class="resultado-detalle"></p>
-            <button id="btn-siguiente" class="btn-sierra">SIGUIENTE VÍCTIMA</button>
+            <div id="bloque-justificacion" class="cinta cinta-justif hidden">
+              <p id="resultado-pregunta" class="resultado-pregunta"></p>
+              <div class="sello">JUSTIFICACIÓN</div>
+              <div id="texto-justificacion" class="pregunta-texto"></div>
+            </div>
+            <button id="btn-no-justifico" class="btn-acero no-justifico hidden"></button>
+            <div><button id="btn-siguiente" class="btn-sierra">SIGUIENTE VÍCTIMA</button></div>
           </div>
         </div>
       </div>
@@ -110,6 +119,39 @@
         <div id="grid-cajas-estado" class="grid-mini"></div>
       </div>
     </div>
+  </section>
+
+  <!-- ======================= TAB: PREGUNTAS ======================= -->
+  <section id="tab-preguntas" class="tab hidden">
+    <div class="card">
+      <h2>Banco de preguntas</h2>
+      <p id="banco-info" class="hint"></p>
+      <div class="form-row filtros">
+        <input id="filtro-texto" placeholder="Buscar en pregunta o justificación">
+        <select id="filtro-tema"><option value="">Todos los temas</option></select>
+        <select id="filtro-dif">
+          <option value="">Toda dificultad</option>
+          <option value="1">1 · Fácil</option>
+          <option value="2">2 · Media</option>
+          <option value="3">3 · Difícil</option>
+        </select>
+        <select id="filtro-resp">
+          <option value="">V y F</option>
+          <option value="V">Verdadero</option>
+          <option value="F">Falso</option>
+        </select>
+      </div>
+      <div class="form-row acciones-banco">
+        <button id="btn-nueva-pregunta" class="btn-sangre">+ Nueva pregunta</button>
+        <span class="spacer"></span>
+        <button id="btn-exportar-banco-xlsx">Exportar Excel</button>
+        <button id="btn-exportar-banco-json">Exportar JSON</button>
+        <button id="btn-reset-usos">Reiniciar usos</button>
+        <button id="btn-restaurar-banco" class="btn-acero">Restaurar banco original</button>
+      </div>
+    </div>
+    <div id="lista-preguntas"></div>
+    <datalist id="lista-temas"></datalist>
   </section>
 
   <!-- ======================= TAB: EDITAR ======================= -->
@@ -142,6 +184,38 @@
         <thead><tr><th>Nombre</th><th>Apellido</th><th>Código</th><th>Activo</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
+    </div>
+  </section>
+
+  <!-- ======================= TAB: AJUSTES ======================= -->
+  <section id="tab-ajustes" class="tab hidden">
+    <div class="card">
+      <h2>Dificultad por casilla</h2>
+      <p class="hint">
+        Al escoger una casilla se sortea el nivel de la pregunta con estas probabilidades.
+        Cada nivel necesita al menos <span id="ajustes-minimo"></span>% y cada fila debe sumar 100%.
+        Si un nivel se queda sin preguntas en la partida, su probabilidad se reparte entre los demás.
+      </p>
+      <table class="tabla-dist">
+        <thead>
+          <tr>
+            <th>Casilla</th>
+            <th>☠ Fácil</th>
+            <th>☠☠ Media</th>
+            <th>☠☠☠ Difícil</th>
+            <th>Suma</th>
+            <th class="col-barra"></th>
+          </tr>
+        </thead>
+        <tbody id="tabla-dist"></tbody>
+      </table>
+      <p id="ajustes-banco" class="hint"></p>
+      <p id="ajustes-error" class="ajustes-error"></p>
+      <div class="form-row">
+        <button id="btn-guardar-ajustes" class="btn-sangre">Guardar</button>
+        <button id="btn-restaurar-ajustes" class="btn-acero">Valores por defecto</button>
+        <span id="ajustes-ok" class="hint"></span>
+      </div>
     </div>
   </section>
 </main>

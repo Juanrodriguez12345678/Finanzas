@@ -180,6 +180,14 @@ const Sonido = (() => {
       ruido(1.2, 0.2, 600);
     },
     tecla() { tono(1200 + Math.random() * 300, 0.012, 0.015, "triangle"); },
+    // sello de goma golpeando el papel (aparece la justificación)
+    sello() { tono(95, 0.25, 0.45, "sine", 45); ruido(0.18, 0.35, 900); },
+    // candado que se cierra: el bono queda encerrado (no justificó)
+    candado() {
+      tono(2300, 0.04, 0.12, "square");
+      setTimeout(() => { tono(1700, 0.09, 0.18, "square", 700); ruido(0.25, 0.3, 3200, "bandpass"); }, 110);
+      setTimeout(() => { tono(160, 0.35, 0.3, "sawtooth", 50); ruido(0.5, 0.35, 700); }, 260);
+    },
     setVolumen(canal, v) {
       vol[canal] = v;
       aplicarGanancias();
@@ -516,6 +524,8 @@ $$(".tab-btn").forEach((btn) => {
     $$(".tab").forEach((t) => t.classList.add("hidden"));
     $("#tab-" + btn.dataset.tab).classList.remove("hidden");
     if (btn.dataset.tab === "editar") cargarEstudiantes();
+    if (btn.dataset.tab === "preguntas") cargarPreguntas().catch((e) => showError(e.message));
+    if (btn.dataset.tab === "ajustes") cargarAjustes().catch((e) => showError(e.message));
   });
 });
 
@@ -589,6 +599,22 @@ $("#btn-saltar").addEventListener("click", () => accion(async () => {
   escribir($("#texto-pregunta"), s.pregunta_actual.texto);
 }));
 
+$("#btn-no-justifico").addEventListener("click", () => accion(async () => {
+  const quitar = estado.ultimo_resultado.justifico;
+  const s = await api("POST", "/api/game/justificacion", { justifico: !quitar });
+  render(s);
+  if (quitar) {
+    Sonido.candado();
+    Sonido.archivo("JigsawLaugh.mp3", 0.8, 2600);
+    mostrarBanner("neutral largo", "NO JUSTIFICÓ", "+0.0");
+    efectoPantalla("temblor-pantalla", 500);
+    sacudirTitere();
+  } else {
+    Sonido.reja();
+    mostrarBanner("ok", "JUSTIFICÓ", fmt(s.ultimo_resultado.puntaje));
+  }
+}));
+
 $("#btn-siguiente").addEventListener("click", () => accion(async () => {
   render(await api("POST", "/api/game/next"));
 }));
@@ -656,8 +682,12 @@ async function escribir(el, texto) {
 }
 
 const fmt = (x) => (x > 0 ? "+" : "") + Number(x).toFixed(1);
+const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const NIVELES = { 1: "Fácil", 2: "Media", 3: "Difícil" };
+const calaveras = (d) => "☠".repeat(d) + `<span class="off">${"☠".repeat(3 - d)}</span>`;
 
 function alEntrarEnFase(s) {
+  escribiendo++; // corta cualquier texto que se esté escribiendo
   if (s.fase === "esperando_presente") {
     const h = $("#nombre-elegido");
     h.classList.remove("revelar");
@@ -701,7 +731,25 @@ function alEntrarEnFase(s) {
       efectoPantalla("temblor-pantalla", 500);
       FX.correr(false);
     }
+    if (r.presente) mostrarJustificacion(r);
   }
+}
+
+// La justificación se "estampa" en el papel cuando se despeja el banner.
+async function mostrarJustificacion(r) {
+  const token = ++escribiendo;
+  const el = $("#texto-justificacion");
+  el.textContent = "";
+  el.classList.remove("lista");
+  $(".sello").classList.remove("estampar");
+  await sleep(1300);
+  if (token !== escribiendo || estado.fase !== "ronda_completa") return;
+  void $(".sello").offsetWidth;
+  $(".sello").classList.add("estampar");
+  Sonido.sello();
+  await sleep(350);
+  if (token !== escribiendo) return;
+  escribir(el, r.pregunta.justificacion || "(Esta pregunta no tiene justificación registrada.)");
 }
 
 function render(s) {
@@ -740,14 +788,31 @@ function render(s) {
   if (s.fase === "esperando_respuesta") {
     $("#nombre-pregunta").textContent = nombre;
     $("#valor-caja-actual").textContent = s.caja_actual ? s.caja_actual.valor : "";
+    const q = s.pregunta_actual;
+    $("#tema-pregunta").textContent = q && q.tema ? q.tema : "";
+    $("#dif-pregunta").innerHTML = q && q.dificultad ? calaveras(q.dificultad) : "";
+    $("#dif-pregunta").title = q && q.dificultad ? "Dificultad " + NIVELES[q.dificultad] : "";
   }
   if (s.fase === "ronda_completa" && s.ultimo_resultado) {
     const r = s.ultimo_resultado;
     const n = `${r.estudiante.nombre} ${r.estudiante.apellido}`;
     $("#resultado-titulo").textContent = n;
-    $("#resultado-detalle").textContent = !r.presente
-      ? `No estaba en el salón. ${fmt(r.puntaje)} automático.`
-      : `Respuesta correcta: ${r.pregunta.respuesta_correcta === "V" ? "VERDADERO" : "FALSO"} · ${fmt(r.puntaje)} puntos`;
+    show("#bloque-justificacion", r.presente);
+    show("#btn-no-justifico", r.presente && r.correcto);
+    if (!r.presente) {
+      $("#resultado-detalle").textContent = `No estaba en el salón. ${fmt(r.puntaje)} automático.`;
+    } else {
+      const resp = r.pregunta.respuesta_correcta === "V" ? "VERDADERO" : "FALSO";
+      const puntos = r.correcto && !r.justifico
+        ? `<s>${fmt(r.caja_valor)}</s> <strong class="sin-justificar">+0.0</strong> puntos (no justificó)`
+        : `<strong class="${r.correcto ? "pts-ok" : "pts-bad"}">${fmt(r.puntaje)}</strong> puntos`;
+      $("#resultado-detalle").innerHTML = `Respuesta correcta: ${resp} · ${puntos}`;
+      $("#resultado-pregunta").textContent = r.pregunta.texto;
+      $("#btn-no-justifico").textContent = r.justifico
+        ? `✗ NO JUSTIFICÓ (pierde el ${fmt(r.caja_valor)})`
+        : `↺ Sí justificó (devolver el ${fmt(r.caja_valor)})`;
+      $("#btn-no-justifico").classList.toggle("activo", !r.justifico);
+    }
   }
 
   const mini = $("#grid-cajas-estado");
@@ -858,6 +923,270 @@ $("#btn-agregar-estudiante").addEventListener("click", async () => {
     $("#nuevo-codigo").value = "";
     cargarEstudiantes();
     cargarConteoSecciones();
+  } catch (e) { showError(e.message); }
+});
+
+// =====================================================================
+// Banco de preguntas
+// =====================================================================
+let banco = null;
+let editando = null; // id de la pregunta en edición, o "nueva"
+
+async function cargarPreguntas() {
+  banco = await api("GET", "/api/preguntas");
+  const temas = [...new Set(banco.preguntas.map((p) => p.tema).filter(Boolean))].sort();
+  const sel = $("#filtro-tema");
+  const actual = sel.value;
+  sel.innerHTML = '<option value="">Todos los temas</option>' + temas.map((t) => `<option>${esc(t)}</option>`).join("");
+  sel.value = temas.includes(actual) ? actual : "";
+  $("#lista-temas").innerHTML = temas.map((t) => `<option value="${esc(t)}">`).join("");
+  pintarPreguntas();
+}
+
+function pintarPreguntas() {
+  const lista = banco.preguntas;
+  const cuenta = [1, 2, 3].map((d) => lista.filter((p) => p.dificultad === d).length);
+  $("#banco-info").innerHTML =
+    `${lista.length} preguntas · ${cuenta[0]} fáciles · ${cuenta[1]} medias · ${cuenta[2]} difíciles · ` +
+    (banco.modificado
+      ? `<span class="aviso">Editado en este navegador.</span> Los cambios no se suben solos: usa "Exportar JSON" y reemplaza <code>data/preguntas.json</code> para compartirlos.`
+      : "Banco original.");
+
+  const txt = $("#filtro-texto").value.trim().toLowerCase();
+  const tema = $("#filtro-tema").value;
+  const dif = $("#filtro-dif").value;
+  const resp = $("#filtro-resp").value;
+  const visibles = lista.filter((p) =>
+    (!txt || (p.texto + " " + (p.justificacion || "")).toLowerCase().includes(txt)) &&
+    (!tema || p.tema === tema) &&
+    (!dif || p.dificultad === Number(dif)) &&
+    (!resp || p.respuesta === resp)
+  );
+
+  const cont = $("#lista-preguntas");
+  cont.innerHTML = "";
+  if (editando === "nueva") cont.appendChild(formPregunta({ texto: "", respuesta: "V", dificultad: 2, tema: tema, justificacion: "" }));
+  if (!visibles.length) {
+    const vacio = document.createElement("p");
+    vacio.className = "hint centrado";
+    vacio.textContent = "Ninguna pregunta coincide con los filtros.";
+    cont.appendChild(vacio);
+  }
+  for (const p of visibles) cont.appendChild(editando === p.id ? formPregunta(p) : itemPregunta(p));
+}
+
+function itemPregunta(p) {
+  const d = document.createElement("div");
+  d.className = "card pregunta-item";
+  d.innerHTML = `
+    <div class="pregunta-cabecera">
+      <span class="num">#${p.id}</span>
+      <span class="tema">${esc(p.tema || "Sin tema")}${p.numero_original ? " · " + p.numero_original : ""}</span>
+      <span class="calaveras" title="Dificultad ${NIVELES[p.dificultad]}">${calaveras(p.dificultad)}</span>
+      <span class="badge-resp ${p.respuesta}">${p.respuesta === "V" ? "VERDADERO" : "FALSO"}</span>
+      <span class="usos">${p.usada_en_partida ? `Salió ${p.usada_en_partida} ${p.usada_en_partida === 1 ? "vez" : "veces"}` : "Sin usar"}</span>
+      <span class="spacer"></span>
+      <button class="btn-editar">Editar</button>
+      <button class="btn-borrar btn-sangre">Eliminar</button>
+    </div>
+    <p class="pregunta-enunciado">${esc(p.texto)}</p>
+    <p class="pregunta-justif"><span>Justificación:</span> ${esc(p.justificacion || "—")}</p>`;
+  d.querySelector(".btn-editar").addEventListener("click", () => {
+    editando = p.id;
+    pintarPreguntas();
+  });
+  d.querySelector(".btn-borrar").addEventListener("click", async () => {
+    if (!confirm(`¿Eliminar la pregunta #${p.id}?`)) return;
+    try {
+      await api("DELETE", "/api/preguntas/" + p.id);
+      Sonido.golpe();
+      await cargarPreguntas();
+    } catch (e) { showError(e.message); }
+  });
+  return d;
+}
+
+function formPregunta(p) {
+  const nueva = p.id == null;
+  const d = document.createElement("div");
+  d.className = "card pregunta-item editando";
+  d.innerHTML = `
+    <h3>${nueva ? "Nueva pregunta" : "Editar pregunta #" + p.id}</h3>
+    <label>Enunciado<textarea class="f-texto" rows="3"></textarea></label>
+    <div class="form-row">
+      <label>Respuesta
+        <select class="f-resp"><option value="V">Verdadero</option><option value="F">Falso</option></select>
+      </label>
+      <label>Dificultad
+        <select class="f-dif"><option value="1">1 · Fácil</option><option value="2">2 · Media</option><option value="3">3 · Difícil</option></select>
+      </label>
+      <label class="crece">Tema<input class="f-tema" list="lista-temas"></label>
+    </div>
+    <label>Justificación<textarea class="f-justif" rows="3"></textarea></label>
+    <div class="form-row">
+      <button class="btn-guardar btn-sangre">Guardar</button>
+      <button class="btn-cancelar">Cancelar</button>
+    </div>`;
+  d.querySelector(".f-texto").value = p.texto;
+  d.querySelector(".f-resp").value = p.respuesta;
+  d.querySelector(".f-dif").value = String(p.dificultad);
+  d.querySelector(".f-tema").value = p.tema || "";
+  d.querySelector(".f-justif").value = p.justificacion || "";
+  d.querySelector(".btn-cancelar").addEventListener("click", () => {
+    editando = null;
+    pintarPreguntas();
+  });
+  d.querySelector(".btn-guardar").addEventListener("click", async () => {
+    const body = {
+      texto: d.querySelector(".f-texto").value,
+      respuesta: d.querySelector(".f-resp").value,
+      dificultad: d.querySelector(".f-dif").value,
+      tema: d.querySelector(".f-tema").value,
+      justificacion: d.querySelector(".f-justif").value,
+    };
+    try {
+      if (nueva) await api("POST", "/api/preguntas", body);
+      else await api("PUT", "/api/preguntas/" + p.id, body);
+      Sonido.reja();
+      editando = null;
+      await cargarPreguntas();
+    } catch (e) { showError(e.message); }
+  });
+  setTimeout(() => d.querySelector(".f-texto").focus(), 0);
+  return d;
+}
+
+["#filtro-texto", "#filtro-tema", "#filtro-dif", "#filtro-resp"].forEach((sel) =>
+  $(sel).addEventListener("input", () => banco && pintarPreguntas())
+);
+
+$("#btn-nueva-pregunta").addEventListener("click", () => {
+  editando = "nueva";
+  pintarPreguntas();
+  $("#lista-preguntas").scrollIntoView({ behavior: "smooth" });
+});
+
+$("#btn-restaurar-banco").addEventListener("click", async () => {
+  if (!confirm("¿Volver al banco original? Se pierden las preguntas agregadas o editadas en este navegador.")) return;
+  try {
+    await api("POST", "/api/preguntas/restaurar");
+    editando = null;
+    Sonido.golpe();
+    await cargarPreguntas();
+  } catch (e) { showError(e.message); }
+});
+
+$("#btn-reset-usos").addEventListener("click", async () => {
+  if (!confirm("¿Poner en 0 el contador de veces que salió cada pregunta?")) return;
+  try {
+    await api("POST", "/api/preguntas/reset_usos");
+    await cargarPreguntas();
+  } catch (e) { showError(e.message); }
+});
+
+function descargar(nombre, contenido, tipo) {
+  const url = URL.createObjectURL(new Blob([contenido], { type: tipo }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nombre;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+$("#btn-exportar-banco-json").addEventListener("click", async () => {
+  await Motor.listo;
+  const b = Motor.banco();
+  b.version = new Date().toISOString().slice(0, 10);
+  descargar("preguntas.json", JSON.stringify(b, null, 1), "application/json");
+});
+
+$("#btn-exportar-banco-xlsx").addEventListener("click", async () => {
+  const { preguntas } = await api("GET", "/api/preguntas");
+  const filas = [["id", "numero_original", "tema", "dificultad", "respuesta", "texto", "justificacion", "usada_en_partida"]].concat(
+    preguntas.map((p) => [p.id, p.numero_original ?? "", p.tema, p.dificultad, p.respuesta, p.texto, p.justificacion, p.usada_en_partida])
+  );
+  const ws = XLSX.utils.aoa_to_sheet(filas);
+  ws["!cols"] = [{ wch: 5 }, { wch: 8 }, { wch: 26 }, { wch: 10 }, { wch: 10 }, { wch: 80 }, { wch: 60 }, { wch: 10 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Preguntas");
+  XLSX.writeFile(wb, "banco_preguntas.xlsx");
+});
+
+// =====================================================================
+// Ajustes: probabilidad de cada dificultad según la casilla
+// =====================================================================
+let ajustesInfo = null;
+
+async function cargarAjustes() {
+  ajustesInfo = await api("GET", "/api/ajustes");
+  pintarAjustes(ajustesInfo.distribucion);
+}
+
+function pintarAjustes(dist) {
+  const { minimo, casillas, por_dificultad } = ajustesInfo;
+  $("#ajustes-minimo").textContent = minimo;
+  $("#ajustes-banco").textContent =
+    `Banco actual: ${por_dificultad[0]} fáciles · ${por_dificultad[1]} medias · ${por_dificultad[2]} difíciles.`;
+  $("#ajustes-ok").textContent = "";
+  const tbody = $("#tabla-dist");
+  tbody.innerHTML = "";
+  for (const k of casillas) {
+    const tr = document.createElement("tr");
+    tr.dataset.casilla = k;
+    tr.innerHTML =
+      `<td class="casilla">${k}</td>` +
+      [0, 1, 2].map((i) => `<td><input type="number" min="${minimo}" max="${100 - 2 * minimo}" step="5" value="${dist[k][i]}"> %</td>`).join("") +
+      `<td class="suma"></td><td class="col-barra"><div class="barra-dist"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div></td>`;
+    tr.querySelectorAll("input").forEach((inp) => inp.addEventListener("input", validarAjustes));
+    tbody.appendChild(tr);
+  }
+  validarAjustes();
+}
+
+function leerAjustes() {
+  const dist = {};
+  $$("#tabla-dist tr").forEach((tr) => {
+    dist[tr.dataset.casilla] = [...tr.querySelectorAll("input")].map((i) => Math.round(Number(i.value) || 0));
+  });
+  return dist;
+}
+
+function validarAjustes() {
+  const { minimo } = ajustesInfo;
+  const dist = leerAjustes();
+  const errores = [];
+  $$("#tabla-dist tr").forEach((tr) => {
+    const fila = dist[tr.dataset.casilla];
+    const suma = fila.reduce((a, b) => a + b, 0);
+    const bajo = fila.some((x) => x < minimo);
+    tr.querySelector(".suma").textContent = suma + "%";
+    tr.classList.toggle("invalida", suma !== 100 || bajo);
+    tr.querySelectorAll("input").forEach((inp, i) => inp.classList.toggle("bajo", fila[i] < minimo));
+    tr.querySelectorAll(".barra-dist span").forEach((sp, i) => (sp.style.flexGrow = Math.max(0, fila[i])));
+    if (suma !== 100) errores.push(`Casilla ${tr.dataset.casilla}: suma ${suma}%`);
+    if (bajo) errores.push(`Casilla ${tr.dataset.casilla}: algún nivel está por debajo de ${minimo}%`);
+  });
+  $("#ajustes-error").textContent = errores.join(" · ");
+  $("#btn-guardar-ajustes").disabled = errores.length > 0;
+  $("#ajustes-ok").textContent = "";
+  return !errores.length;
+}
+
+$("#btn-guardar-ajustes").addEventListener("click", async () => {
+  if (!validarAjustes()) return;
+  try {
+    ajustesInfo = await api("PUT", "/api/ajustes", { distribucion: leerAjustes() });
+    pintarAjustes(ajustesInfo.distribucion);
+    Sonido.reja();
+    $("#ajustes-ok").textContent = "Guardado ✓";
+  } catch (e) { showError(e.message); }
+});
+
+$("#btn-restaurar-ajustes").addEventListener("click", async () => {
+  try {
+    ajustesInfo = await api("POST", "/api/ajustes/restaurar");
+    pintarAjustes(ajustesInfo.distribucion);
+    $("#ajustes-ok").textContent = "Valores por defecto restaurados ✓";
   } catch (e) { showError(e.message); }
 });
 

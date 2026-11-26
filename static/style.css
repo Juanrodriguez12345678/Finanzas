@@ -62,7 +62,7 @@ header {
 }
 .logo { font-family: "Creepster", cursive; font-size: 30px; letter-spacing: 2px; color: var(--hueso); }
 .logo span { color: var(--sangre-viva); }
-nav { display: flex; gap: 8px; align-items: center; }
+nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
 main { max-width: 1200px; margin: 0 auto; padding: 18px 16px 40px; }
 
@@ -329,6 +329,88 @@ table.tabla-estudiantes th, table.tabla-estudiantes td { border-bottom: 1px soli
 table.tabla-estudiantes input { width: 100%; }
 table.tabla-estudiantes button { padding: 6px 10px; font-size: 13px; margin-right: 4px; }
 
+/* ---------------------------------------------------------- pregunta: tema y dificultad */
+.meta-pregunta {
+  display: flex; justify-content: center; gap: 14px; align-items: baseline;
+  margin: -6px 0 0; color: var(--muted); font-size: 16px; letter-spacing: 1px;
+}
+.calaveras { color: var(--sangre-viva); font-size: 20px; letter-spacing: 3px; text-shadow: 0 0 8px rgba(255,31,61,0.5); }
+.calaveras .off { color: var(--muted); opacity: 0.25; text-shadow: none; }
+
+/* ---------------------------------------------------------- resultado: justificación */
+.resultado-detalle s { color: var(--muted); }
+.resultado-detalle .pts-ok { color: var(--verde); }
+.resultado-detalle .pts-bad { color: var(--sangre-viva); }
+.resultado-detalle .sin-justificar { color: var(--hueso); text-shadow: 0 0 10px rgba(232,220,192,0.5); }
+.cinta-justif { position: relative; transform: rotate(0.3deg); margin-top: 10px; text-align: left; }
+.resultado-pregunta {
+  margin: 0 0 14px; font-size: 15px; line-height: 1.4; color: #5a4a36;
+  border-bottom: 1px dashed #1a120c55; padding-bottom: 10px;
+}
+.sello {
+  display: inline-block; margin-bottom: 8px; padding: 2px 10px;
+  font-family: "Creepster", cursive; font-size: 22px; letter-spacing: 3px;
+  color: var(--sangre); border: 3px solid var(--sangre); border-radius: 3px;
+  transform: rotate(-4deg); opacity: 0;
+}
+.sello.estampar { animation: estampar 0.35s cubic-bezier(.2,1.6,.4,1) forwards; }
+@keyframes estampar {
+  0% { opacity: 0; transform: rotate(-4deg) scale(2.6); }
+  100% { opacity: 0.85; transform: rotate(-4deg) scale(1); }
+}
+#texto-justificacion { font-size: 19px; min-height: 2em; }
+.no-justifico { margin: 4px 0 18px; font-size: 15px; padding: 9px 16px; }
+.no-justifico.activo {
+  background: linear-gradient(#2a1c14, #0d0805); border-color: var(--oxido); color: var(--hueso);
+}
+#banner.largo #banner-texto { font-size: clamp(60px, 12vw, 190px); }
+
+/* ---------------------------------------------------------- banco de preguntas */
+.filtros input { flex: 2; }
+.acciones-banco { margin-top: 12px; }
+.acciones-banco button { font-size: 14px; padding: 8px 12px; }
+.aviso { color: var(--sangre-viva); }
+code { font-family: "VT323", monospace; font-size: 18px; color: var(--hueso); }
+.centrado { text-align: center; }
+.pregunta-item { padding: 14px 18px; margin-bottom: 12px; }
+.pregunta-cabecera { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pregunta-cabecera .num { font-family: "VT323", monospace; font-size: 24px; color: var(--sangre-viva); }
+.pregunta-cabecera .tema { color: var(--hueso); }
+.pregunta-cabecera .usos { color: var(--muted); font-size: 13px; }
+.pregunta-cabecera button { padding: 5px 10px; font-size: 13px; }
+.badge-resp { font-family: "VT323", monospace; font-size: 18px; padding: 0 8px; border-radius: 3px; border: 1px solid; }
+.badge-resp.V { color: var(--verde); border-color: rgba(43,255,106,0.5); }
+.badge-resp.F { color: var(--sangre-viva); border-color: rgba(255,31,61,0.5); }
+.pregunta-enunciado { margin: 10px 0 6px; font-size: 16px; line-height: 1.45; }
+.pregunta-justif { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.4; }
+.pregunta-justif span { color: var(--oxido); filter: brightness(1.6); }
+.pregunta-item.editando { border-color: var(--sangre-viva); box-shadow: 0 0 18px rgba(255,31,61,0.25); }
+.pregunta-item h3 { margin: 0 0 10px; font-family: "Creepster", cursive; letter-spacing: 2px; color: var(--sangre-viva); font-weight: normal; }
+.pregunta-item label { display: flex; flex-direction: column; gap: 4px; color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+.pregunta-item label.crece { flex: 1; }
+.pregunta-item textarea {
+  font-family: "Special Elite", monospace; font-size: 15px; padding: 9px 12px; border-radius: 4px;
+  border: 1px solid var(--borde); background: #0d0907; color: var(--texto); resize: vertical; width: 100%;
+}
+
+/* ---------------------------------------------------------- ajustes */
+table.tabla-dist { width: 100%; border-collapse: collapse; margin: 10px 0; }
+table.tabla-dist th, table.tabla-dist td { border-bottom: 1px solid var(--borde); padding: 8px; text-align: left; white-space: nowrap; }
+table.tabla-dist th { color: var(--muted); font-weight: normal; font-size: 14px; }
+table.tabla-dist .casilla { font-family: "VT323", monospace; font-size: 30px; color: var(--hueso); }
+table.tabla-dist input { width: 78px; font-family: "VT323", monospace; font-size: 20px; padding: 4px 8px; }
+table.tabla-dist input.bajo { border-color: var(--sangre-viva); color: var(--sangre-viva); }
+table.tabla-dist .suma { font-family: "VT323", monospace; font-size: 22px; color: var(--muted); }
+table.tabla-dist tr.invalida .suma { color: var(--sangre-viva); }
+table.tabla-dist .col-barra { width: 40%; }
+.barra-dist { display: flex; height: 18px; border: 1px solid var(--borde); border-radius: 3px; overflow: hidden; }
+.barra-dist span { flex-basis: 0; transition: flex-grow .2s; }
+.barra-dist .d1 { background: #c9b98f; }
+.barra-dist .d2 { background: #8a3a1a; }
+.barra-dist .d3 { background: var(--sangre-viva); }
+.ajustes-error { color: var(--sangre-viva); min-height: 1.2em; }
+button:disabled { opacity: 0.4; cursor: not-allowed; filter: none; }
+
 .error {
   position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 70;
   background: #3a0008; border: 1px solid var(--sangre-viva); color: #ffd0d6;
@@ -339,4 +421,5 @@ table.tabla-estudiantes button { padding: 6px 10px; font-size: 13px; margin-righ
   #titere { display: none; }
   .grid-mini { grid-template-columns: repeat(8, 1fr); }
   .btn-sierra { font-size: 24px; padding: 14px 22px; }
+  table.tabla-dist .col-barra { display: none; }
 }
